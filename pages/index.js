@@ -1,9 +1,10 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import Lottie from "react-lottie"
 import styles from "../styles/Home.module.css";
 import stringChecker from "../utils/stringChecker";
 import Card from "../comps/Card";
-import Spline from '@splinetool/react-spline';
+import globeAnimation from '../public/lottie/globe.json'
 
 export default function Home() {
   const [newPrompt, setNewPrompt] = useState("");
@@ -63,6 +64,15 @@ export default function Home() {
     ready ? localStorage.setItem('results', JSON.stringify(result)) : null;
   }, [result]);
 
+    const lottieOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: globeAnimation,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice"
+    }
+  };
+
 
   return (
     <div>
@@ -76,7 +86,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <div className="splineCont">
-          <Spline scene="https://prod.spline.design/oYIALHWyxgsEpJko/scene.splinecode" alt='spinning animated globe ' />
+          {globeAnimation && <Lottie
+            options={lottieOptions}
+            height={300}
+            width={300}
+          />}
         </div>
         <h1>Travel Bug</h1>
         <h2>Describe a trip, get a location<br></br>Sit back and let AI do the brainstorming!</h2>
