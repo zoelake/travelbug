@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import stringChecker from "../utils/stringChecker";
 import Card from "../comps/Card";
-// import Spline from '@splinetool/react-spline';
+import Spline from '@splinetool/react-spline';
 
 export default function Home() {
   const [newPrompt, setNewPrompt] = useState("");
@@ -76,7 +76,7 @@ export default function Home() {
 
       <main className={styles.main}>
         <div className="splineCont">
-          {/* <Spline scene="https://prod.spline.design/oYIALHWyxgsEpJko/scene.splinecode" alt='spinning animated globe ' /> */}
+          <Spline scene="https://prod.spline.design/oYIALHWyxgsEpJko/scene.splinecode" alt='spinning animated globe ' />
         </div>
         <h1>Travel Bug</h1>
         <h2>Describe a trip, get a location<br></br>Sit back and let AI do the brainstorming!</h2>
