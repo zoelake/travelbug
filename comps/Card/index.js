@@ -9,7 +9,7 @@ function Card({
         <div className='card'>
             {/* load google maps location based on location generated */}
             {/* place.length to handle api returning empty */}
-            {(place.length > 5) && (place.length < 20) ? <a href={`https://www.google.com/maps/place/${place}`} target="_blank">
+            {(place.length > 5) && (place.length < 50) ? <a href={`https://www.google.com/maps/place/${place}`} target="_blank">
                 <FiExternalLink
                     size={30}
                     id='card__icon'
@@ -18,7 +18,7 @@ function Card({
             <p>I want to go somewhere...</p>
             <p className="card__textPrompt">{prompt}</p>
 
-            {(place.length > 5) && (place.length < 20) ? <>
+            {(place.length > 5) && (place.length < 50) ? <>
                 <p>Travel Bot recommends...</p>
                 <a href={`https://www.google.com/maps/place/${place}`} target="_blank">
                     <p id='card__textResult'>{place}</p>
