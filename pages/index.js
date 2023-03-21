@@ -22,38 +22,51 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
-
+  
     //forces the user to write something
     if (newPrompt.length > 5) {
-      const response = await fetch("/api/openAI", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ idea: newPrompt }),
-      });
-      const data = await response.json();
-      const prompt = data.prompt;
-      const place = data.result;
-
-      //triggers localStorage to save/update new prompt/response
-      setReady(true);
-
-      //checks for empty strings from api then set response
-      const checker = stringChecker(place);
-      if (checker) {
-        setResult(prev => [
-          ...prev,
-          { prompt, checker }
-        ]);
-      } else {
-        setResult(prev => [
-          ...prev,
-          { prompt, place }
-        ]);
+      try {
+        const response = await fetch("/api/openAI", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idea: newPrompt }),
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          const prompt = data.prompt;
+          const place = data.result;
+  
+          //triggers localStorage to save/update new prompt/response
+          setReady(true);
+  
+          //checks for empty strings from api then set response
+          const checker = stringChecker(place);
+          if (checker) {
+            setResult((prev) => [
+              ...prev,
+              { prompt, checker },
+            ]);
+          } else {
+            setResult((prev) => [
+              ...prev,
+              { prompt, place },
+            ]);
+          }
+        } else if (response.status === 429) {
+          const retryAfter = response.headers.get("Retry-After");
+          const message = await response.json();
+          alert(`${message.error}. Please try again in ${retryAfter} seconds.`);
+        } else {
+          throw new Error(response.statusText);
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
       }
     } else {
-      alert('Please type more!')
+      alert("Please type more!");
     }
     //reset input
     setNewPrompt("");
