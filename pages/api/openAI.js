@@ -2,7 +2,7 @@ import { Configuration, OpenAIApi } from "openai";
 import rateLimit from "express-rate-limit";
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
