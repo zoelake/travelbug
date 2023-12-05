@@ -2,11 +2,7 @@
 import OpenAI from "openai";
 import rateLimit from "express-rate-limit";
 
-const openai = new OpenAI({
-    headers: {
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
-    }
-});
+const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY });
 
 const limiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
