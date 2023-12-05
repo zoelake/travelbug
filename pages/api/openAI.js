@@ -1,3 +1,4 @@
+
 import OpenAI from "openai";
 import rateLimit from "express-rate-limit";
 
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
     try {
       const completion = await openai.chat.completions.create({
         messages: [{ role: "system", content: generatePrompt(req.body.idea) }],
-        model: "gpt-3.5-turbo-instruct",
+        model: "gpt-3.5-turbo",
       });
       console.log(completion.choices[0]);
       res.status(200).json({ prompt: req.body.idea, result: completion.choices[0].message.content });
