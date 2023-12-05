@@ -54,6 +54,14 @@
   border-radius: 4px;
   text-align: center;
   cursor: pointer;
+  transition: background-color 0.5s;
+}
+.main input[type="submit"]:hover {
+  background-color: #11b68d;
+}
+.main input[type="submit"]:disabled {
+  background-color: grey;
+  cursor: not-allowed;
 }
 
 .main .result {

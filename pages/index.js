@@ -10,6 +10,7 @@ export default function Home() {
   const [newPrompt, setNewPrompt] = useState("");
   const [result, setResult] = useState([]);
   const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   //checks & loads past prompts/recommendations from localStorage
   useEffect(() => {
@@ -22,9 +23,10 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
-  
+    
     //forces the user to write something
     if (newPrompt.length > 5) {
+      setLoading(true)
       try {
         const response = await fetch("/api/openAI", {
           method: "POST",
@@ -65,6 +67,7 @@ export default function Home() {
       } catch (error) {
         alert(`Error: ${error.message}`);
       }
+      setLoading(false)
     } else {
       alert("Please type more!");
     }
@@ -110,12 +113,12 @@ export default function Home() {
         <form onSubmit={onSubmit}>
           <input
             type="text"
-            name="animal"
+            // name="animal"
             placeholder="I want to go somewhere..."
             value={newPrompt}
             onChange={(e) => setNewPrompt(e.target.value)}
           />
-          <input type="submit" value="Generate destination" />
+          <input type="submit" value={loading ? "Loading..." :`Generate destination`} disabled={loading} />
         </form>
         <div className={styles.result}>
           {result ? result.map(({ prompt, place }, i) => <Card
