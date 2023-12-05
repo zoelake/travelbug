@@ -1,10 +1,11 @@
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import rateLimit from "express-rate-limit";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
+const openai = new OpenAI({
+    headers: {
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
+    }
 });
-const openai = new OpenAIApi(configuration);
 
 const limiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
@@ -12,14 +13,15 @@ const limiter = rateLimit({
   message: { error: "Too many requests, please try again tomorrow." }
 });
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   limiter(req, res, async () => {
     try {
-      const completion = await openai.createCompletion("text-curie-001", {
-        prompt: generatePrompt(req.body.idea),
-        temperature: 0.7,
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: "system", content: generatePrompt(req.body.idea) }],
+        model: "gpt-3.5-turbo-instruct",
       });
-      res.status(200).json({ prompt: req.body.idea, result: completion.data.choices[0].text });
+      console.log(completion.choices[0]);
+      res.status(200).json({ prompt: req.body.idea, result: completion.choices[0].message.content });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });
