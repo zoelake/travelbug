@@ -20,8 +20,9 @@ export default async function handler(req, res) {
       console.log(completion.choices[0]);
       res.status(200).json({ prompt: req.body.idea, result: completion.choices[0].message.content });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal server error" });
+      if(error.msg?.includes("exceeded your current quota")){
+        res.status(401).json({ message: error.message });
+      } else res.status(500).json({ message: "Internal server error" });
     }
   });
 }

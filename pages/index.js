@@ -61,9 +61,9 @@ export default function Home() {
           const retryAfter = response.headers.get("Retry-After");
           const message = await response.json();
           alert(`${message.error}. Please try again in ${retryAfter} seconds.`);
-        } else {
-          throw new Error(response.statusText);
-        }
+        } else if (response.status === 401) {
+          alert(`Looks like I'm out of credits today so you're out of luck... sorry!`);
+        } else throw new Error(response.statusText);
       } catch (error) {
         alert(`Error: ${error.message}`);
       }
