@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     const idea = req.body?.idea;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [{ role: "system", content: generatePrompt(idea) }],
     });
 
@@ -69,19 +69,23 @@ function generatePrompt(idea) {
 
   return `Suggest a city based on keywords entered.
 
+    Important:
+    - Reply with ONLY the city answer (e.g. "Paris, Île-de-France, France")
+    - Do NOT include the label "City:" and do NOT add extra text.
+
     Keywords: Rainy city with with both mountains and ocean.
-    City: Vancouver, British-Columbia, Canada
+    Answer: Vancouver, British-Columbia, Canada
 
     Keywords: Big city with a subway, lots of art/culture, and broadway shows.
-    City: New York, New York, USA
+    Answer: New York, New York, USA
 
     Keywords: Romantic walks, renaissance art, pastries and baggettes, night clubs.
-    City: Paris, Île-de-France, France
+    Answer: Paris, Île-de-France, France
 
     Keywords: Hot tropical beaches, sun-tanning, monkeys, ancient temples
-    City: Denpasar, Bali, Indonesia
+    Answer: Denpasar, Bali, Indonesia
 
     Keywords: ${newIdea}
-    City:
+    Answer:
   `;
 }
