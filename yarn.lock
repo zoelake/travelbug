@@ -205,6 +205,27 @@
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
 
+"@upstash/core-analytics@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@upstash/core-analytics/-/core-analytics-0.0.10.tgz#e686a313ec2279d5a8d53e6c215085f1c0f5ab4b"
+  integrity sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==
+  dependencies:
+    "@upstash/redis" "^1.28.3"
+
+"@upstash/ratelimit@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@upstash/ratelimit/-/ratelimit-2.0.8.tgz#8bc4213aeaa732db849cdd461330f45a2a0f0a6e"
+  integrity sha512-YSTMBJ1YIxsoPkUMX/P4DDks/xV5YYCswWMamU8ZIfK9ly6ppjRnVOyBhMDXBmzjODm4UQKcxsJPvaeFAijp5w==
+  dependencies:
+    "@upstash/core-analytics" "^0.0.10"
+
+"@upstash/redis@^1.28.3", "@upstash/redis@^1.36.1":
+  version "1.36.1"
+  resolved "https://registry.yarnpkg.com/@upstash/redis/-/redis-1.36.1.tgz#a3ec1ff9ff887c75bf3dc53a56f4a01fcbd33a45"
+  integrity sha512-N6SjDcgXdOcTAF+7uNoY69o7hCspe9BcA7YjQdxVu5d25avljTwyLaHBW3krWjrP0FfocgMk94qyVtQbeDp39A==
+  dependencies:
+    uncrypto "^0.1.3"
+
 abort-controller@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
@@ -958,11 +979,6 @@ event-target-shim@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
   integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
-
-express-rate-limit@^6.7.0:
-  version "6.11.2"
-  resolved "https://registry.yarnpkg.com/express-rate-limit/-/express-rate-limit-6.11.2.tgz#6c42035603d3b52e4e2fb59f6ebaa89e628ef980"
-  integrity sha512-a7uwwfNTh1U60ssiIkuLFWHt4hAC5yxlLGU2VP0X4YNlyEDZAqF4tK3GD3NSitVBrCQmQ0++0uOyFOgC2y4DDw==
 
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
@@ -2317,6 +2333,11 @@ unbox-primitive@^1.1.0:
     has-bigints "^1.0.2"
     has-symbols "^1.1.0"
     which-boxed-primitive "^1.1.1"
+
+uncrypto@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/uncrypto/-/uncrypto-0.1.3.tgz#e1288d609226f2d02d8d69ee861fa20d8348ef2b"
+  integrity sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==
 
 undici-types@~5.26.4:
   version "5.26.5"

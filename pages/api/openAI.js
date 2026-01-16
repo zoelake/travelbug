@@ -1,50 +1,87 @@
-
 import OpenAI from "openai";
-import rateLimit from "express-rate-limit";
+import { ratelimit } from "@/lib/ratelimit";
 
-const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const limiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-  max: 20, // 20 requests per windowMs
-  message: { error: "Too many requests, please try again tomorrow." }
-});
+function getClientIp(req) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length) return xff.split(",")[0].trim();
+  return req.socket?.remoteAddress || "unknown";
+}
 
 export default async function handler(req, res) {
-  limiter(req, res, async () => {
-    try {
-      const completion = await openai.chat.completions.create({
-        messages: [{ role: "system", content: generatePrompt(req.body.idea) }],
-        model: "gpt-3.5-turbo",
-      });
-      console.log(completion.choices[0]);
-      res.status(200).json({ prompt: req.body.idea, result: completion.choices[0].message.content });
-    } catch (error) {
-      if(error.msg?.includes("exceeded your current quota")){
-        res.status(401).json({ message: error.message });
-      } else res.status(500).json({ message: "Internal server error" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
+  const ip = getClientIp(req);
+
+  const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+
+  // standard-ish rate limit headers
+  res.setHeader("X-RateLimit-Limit", limit);
+  res.setHeader("X-RateLimit-Remaining", remaining);
+  res.setHeader("X-RateLimit-Reset", reset);
+
+  if (!success) {
+    // optional: add retry-after (seconds until reset)
+    const retryAfterSeconds = Math.max(
+      1,
+      Math.ceil((Number(reset) * 1000 - Date.now()) / 1000)
+    );
+    res.setHeader("Retry-After", retryAfterSeconds);
+
+    return res.status(429).json({
+      error: "Too many requests, please try again tomorrow.",
+    });
+  }
+
+  try {
+    const idea = req.body?.idea;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "system", content: generatePrompt(idea) }],
+    });
+
+    return res.status(200).json({
+      prompt: idea,
+      result: completion.choices[0].message.content,
+    });
+  } catch (error) {
+    const msg = error?.message || "";
+
+    if (msg.includes("exceeded your current quota")) {
+      return res.status(401).json({ message: msg });
     }
-  });
+
+    console.error("openAI route error:", error?.status, error?.code, msg);
+
+    return res.status(error?.status || 500).json({
+      message: "Something went wrong. Please try again.",
+    });
+  }
 }
 
 function generatePrompt(idea) {
-  const newIdea =
-    idea[0].toUpperCase() + idea.slice(1).toLowerCase();
+  const safe = typeof idea === "string" ? idea : "";
+  const newIdea = safe ? safe[0].toUpperCase() + safe.slice(1).toLowerCase() : "";
+
   return `Suggest a city based on keywords entered.
 
-  Keywords: Rainy city with with both mountains and ocean. 
-  City: Vancouver, British-Columbia, Canada 
+    Keywords: Rainy city with with both mountains and ocean.
+    City: Vancouver, British-Columbia, Canada
 
-  Keywords: Big city with a subway, lots of art/culture, and broadway shows.
-  City: New York, New York, USA 
+    Keywords: Big city with a subway, lots of art/culture, and broadway shows.
+    City: New York, New York, USA
 
-  Keywords: Romantic walks, renaissance art, pastries and baggettes, night clubs.
-  City: Paris, Île-de-France, France 
+    Keywords: Romantic walks, renaissance art, pastries and baggettes, night clubs.
+    City: Paris, Île-de-France, France
 
-  Keywords: Hot tropical beaches, sun-tanning, monkeys, ancient temples
-  City: Denpasar, Bali, Indonesia 
+    Keywords: Hot tropical beaches, sun-tanning, monkeys, ancient temples
+    City: Denpasar, Bali, Indonesia
 
-  Keywords: ${newIdea}
-  City: 
-`;
+    Keywords: ${newIdea}
+    City:
+  `;
 }
