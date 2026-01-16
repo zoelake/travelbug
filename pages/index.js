@@ -23,10 +23,11 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
-    
-    //forces the user to write something
+
+    // forces the user to write something
     if (newPrompt.length > 5) {
-      setLoading(true)
+      setLoading(true);
+
       try {
         const response = await fetch("/api/openAI", {
           method: "POST",
@@ -35,44 +36,63 @@ export default function Home() {
           },
           body: JSON.stringify({ idea: newPrompt }),
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           const prompt = data.prompt;
           const place = data.result;
-  
-          //triggers localStorage to save/update new prompt/response
+
+          // triggers localStorage to save/update new prompt/response
           setReady(true);
-  
-          //checks for empty strings from api then set response
+
+          // checks for empty strings from api then set response
           const checker = stringChecker(place);
           if (checker) {
-            setResult((prev) => [
-              ...prev,
-              { prompt, checker },
-            ]);
+            setResult((prev) => [...prev, { prompt, checker }]);
           } else {
-            setResult((prev) => [
-              ...prev,
-              { prompt, place },
-            ]);
+            setResult((prev) => [...prev, { prompt, place }]);
           }
+
+          setNewPrompt("");
+          return;
+          
         } else if (response.status === 429) {
           const retryAfter = response.headers.get("Retry-After");
-          const message = await response.json();
-          alert(`${message.error}. Please try again in ${retryAfter} seconds.`);
+
+          let message = null;
+          try {
+            message = await response.json();
+          } catch {}
+
+          alert(
+            `${message?.error || "Too many requests."}${
+              retryAfter ? ` Please try again in ${retryAfter} seconds.` : ""
+            }`
+          );
         } else if (response.status === 401) {
           alert(`Looks like I'm out of credits today so you're out of luck... sorry!`);
-        } else throw new Error(response.statusText);
+        } else {
+          let payload = null;
+          try {
+            payload = await response.json();
+          } catch {}
+
+          const msg =
+            payload?.error ||
+            payload?.message ||
+            "Something went wrong. Please try again.";
+
+          throw new Error(msg);
+        }
       } catch (error) {
-        alert(`Error: ${error.message}`);
+        alert(`Error: ${error?.message || "Something went wrong. Please try again."}`);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false)
+
     } else {
       alert("Please type more!");
     }
-    //reset input
-    setNewPrompt("");
   }
 
   // triggered localStorage to save/update new prompt/response
