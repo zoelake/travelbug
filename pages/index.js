@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import Lottie from "react-lottie"
 import styles from "../styles/Home.module.css";
@@ -129,21 +128,31 @@ export default function Home() {
         <meta name="description" content="Describe a trip, get a location. Sit back and let AI do the brainstorming!"></meta>
         <meta name="author" content="Zoë James"></meta>
         <meta charset="utf-8"></meta>
-         {GA.enabled && (
+        {GA.enabled ? (
           <>
-            <Script
+            <script
+              async
               src={`https://www.googletagmanager.com/gtag/js?id=${GA.id}`}
-              strategy="afterInteractive"
             />
-            <Script id="ga4" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA.id}', { anonymize_ip: true });
-              `}
-            </Script>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${GA.id}', { anonymize_ip: true });
+                `,
+              }}
+            />
           </>
+        ) : (
+          process.env.NODE_ENV === "production" && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: "console.warn('Google Analytics disabled: missing NEXT_PUBLIC_GA_ID')",
+              }}
+            />
+          )
         )}
       </Head>
 
