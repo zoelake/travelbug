@@ -1,10 +1,12 @@
 import Head from "next/head";
+import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import Lottie from "react-lottie"
 import styles from "../styles/Home.module.css";
 import stringChecker from "../utils/stringChecker";
 import Card from "../comps/Card";
 import globeAnimation from '../public/lottie/globe.json'
+import GA from "../utils/analytics";
 
 export default function Home() {
   const [newPrompt, setNewPrompt] = useState("");
@@ -127,6 +129,22 @@ export default function Home() {
         <meta name="description" content="Describe a trip, get a location. Sit back and let AI do the brainstorming!"></meta>
         <meta name="author" content="Zoë James"></meta>
         <meta charset="utf-8"></meta>
+         {GA.enabled && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA.id}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA.id}', { anonymize_ip: true });
+              `}
+            </Script>
+          </>
+        )}
       </Head>
 
       <main className={styles.main}>
