@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { ratelimit } from "@/lib/ratelimit";
+import sendAlertOnce from "@/lib/sendAlert";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -16,24 +17,41 @@ export default async function handler(req, res) {
 
   const ip = getClientIp(req);
 
-  const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+  let rl = null;
+  try {
+    rl = await ratelimit.limit(ip);
+  } catch (e) {
+    console.error("ratelimit failed (Upstash unavailable). Blocking request.", e);
 
-  // standard-ish rate limit headers
-  res.setHeader("X-RateLimit-Limit", limit);
-  res.setHeader("X-RateLimit-Remaining", remaining);
-  res.setHeader("X-RateLimit-Reset", reset);
-
-  if (!success) {
-    // optional: add retry-after (seconds until reset)
-    const retryAfterSeconds = Math.max(
-      1,
-      Math.ceil((Number(reset) * 1000 - Date.now()) / 1000)
+    await sendAlertOnce(
+      "🚨 Travelbug – Rate limiter failure",
+      `Upstash rate limit failed at ${new Date().toISOString()}\n\nError: ${e?.message ?? e}`
     );
-    res.setHeader("Retry-After", retryAfterSeconds);
 
-    return res.status(429).json({
-      error: "Too many requests, please try again tomorrow.",
+    return res.status(503).json({
+      message: "Service temporarily unavailable. Please try again tomorrow."
     });
+  }
+
+  if (rl) {
+    const { success, limit, remaining, reset } = rl;
+
+    res.setHeader("X-RateLimit-Limit", limit);
+    res.setHeader("X-RateLimit-Remaining", remaining);
+    res.setHeader("X-RateLimit-Reset", reset);
+
+    if (!success) {
+      // reset is usually a unix timestamp in seconds
+      const retryAfterSeconds = Math.max(
+        1,
+        Math.ceil(Number(reset) - Date.now() / 1000)
+      );
+      res.setHeader("Retry-After", retryAfterSeconds);
+
+      return res.status(429).json({
+        error: "Too many requests, please try again tomorrow.",
+      });
+    }
   }
 
   try {
@@ -52,10 +70,22 @@ export default async function handler(req, res) {
     const msg = error?.message || "";
 
     if (msg.includes("exceeded your current quota")) {
+      await sendAlertOnce(
+        "🚨 Travelbug – OpenAI quota failure",
+        `Exceeded credits quota at ${new Date().toISOString()}\n\nError: ${msg}`
+      );
+
       return res.status(401).json({ message: msg });
     }
 
     console.error("openAI route error:", error?.status, error?.code, msg);
+
+    await sendAlertOnce(
+      "🚨 Travelbug – Unknown OpenAI failure",
+      `Something went wrong at ${new Date().toISOString()}\n\nStatus: ${
+        error?.status ?? "unknown"
+      }\nCode: ${error?.code ?? "unknown"}\nMessage: ${msg}`
+    );
 
     return res.status(error?.status || 500).json({
       message: "Something went wrong. Please try again.",

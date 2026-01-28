@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/upstash-ping", "schedule": "0 12 * * 0" }
+  ]
+}
