@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Lottie from "react-lottie"
 import styles from "../styles/Home.module.css";
 import stringChecker from "../utils/stringChecker";
@@ -11,6 +11,7 @@ export default function Home() {
   const [result, setResult] = useState([]);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
+  const resultsRef = useRef(null);
 
   //checks & loads past prompts/recommendations from localStorage
   useEffect(() => {
@@ -20,6 +21,12 @@ export default function Home() {
       setResult(userData);
     }
   }, []);
+
+  const scrollToResultsTop = () => {
+    if (resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -52,6 +59,8 @@ export default function Home() {
           } else {
             setResult((prev) => [...prev, { prompt, place }]);
           }
+
+          scrollToResultsTop();
 
           setNewPrompt("");
           return;
@@ -140,7 +149,7 @@ export default function Home() {
           />
           <input type="submit" value={loading ? "Loading..." :`Generate destination`} disabled={loading} />
         </form>
-        <div className={styles.result}>
+        <div className={styles.result} ref={resultsRef}>
           {result ? result.map(({ prompt, place }, i) => <Card
             key={i}
             place={place}
