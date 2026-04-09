@@ -11,8 +11,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pong = await redis.ping(); // returns "PONG" :contentReference[oaicite:2]{index=2}
-    return res.status(200).json({ ok: true, pong });
+    const ts = new Date().toISOString();
+    await redis.set("cron:keepalive", ts, { ex: 60 * 60 * 24 * 14 });
+    return res.status(200).json({ ok: true, keepalive: ts });
   } catch (e) {
     await sendAlertOnce(
       "🚨 Travelbug – Upstash ping failure",
